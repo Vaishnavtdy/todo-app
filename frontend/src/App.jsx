@@ -1,20 +1,27 @@
 import { useEffect, useState } from "react";
 import ToDo from "./components/ToDo";
-import { addToDo, deleteToDo, getAllToDo, updateToDo } from "./utils/HandleApi";
+import {
+  addToDo,
+  completeToDo,
+  deleteToDo,
+  getAllToDos,
+  updateToDo,
+} from "./utils/HandleApi";
 
 function App() {
-  const [toDo, setToDo] = useState([]);
+  const [toDos, setToDos] = useState([]);
   const [text, setText] = useState("");
-  const [isUpdating, setIsUpdating] = useState(false);
   const [toDoId, setToDoId] = useState("");
+  const [isUpdate, setIsUpdate] = useState(false);
+
   useEffect(() => {
-    getAllToDo(setToDo);
+    getAllToDos(setToDos);
   }, []);
 
   const updateMode = (_id, text) => {
-    setIsUpdating(true);
-    setText(text);
+    setIsUpdate(true);
     setToDoId(_id);
+    setText(text);
   };
 
   return (
@@ -22,34 +29,36 @@ function App() {
       <div className="container">
         <h1>ToDo App</h1>
 
-        <form
-          className="top"
-          onSubmit={
-            isUpdating
-              ? () => updateToDo(toDoId, text, setText, setToDo, setIsUpdating)
-              : () => addToDo(text, setText, setToDo)
-          }
-        >
+        <div className="top">
           <input
             type="text"
-            placeholder="Add ToDos..."
+            placeholder="Add ToDos.."
             value={text}
-            required
             onChange={(e) => setText(e.target.value)}
           />
-
-          <button type="submit" className="add">
-            {isUpdating ? "Update" : "Add"}
-          </button>
-        </form>
+          <div
+            className="add"
+            onClick={() => {
+              isUpdate
+                ? updateToDo(toDoId, text, setText, setIsUpdate, setToDos)
+                : addToDo(text, setText, setToDos);
+            }}
+          >
+            {isUpdate ? "Update" : "Add"}
+          </div>
+        </div>
 
         <div className="list">
-          {toDo.map((item) => (
+          {toDos?.map((item) => (
             <ToDo
-              key={item._id}
+              key={item?._id}
               text={item.text}
+              status={item.status}
+              deleteToDo={() => deleteToDo(item._id, setToDos)}
               updateMode={() => updateMode(item._id, item.text)}
-              deleteToDo={() => deleteToDo(item._id, setToDo)}
+              completeTodo={() =>
+                completeToDo(item?._id, !item?.status, setToDos)
+              }
             />
           ))}
         </div>
